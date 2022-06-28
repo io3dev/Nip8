@@ -1,11 +1,17 @@
 import nimraylib_now
 import cpu
 import math
+import os
 
+
+
+if paramCount() == 0:
+  echo "Failed to specify a chip8 rom!"
+  quit(QuitFailure)
 
 init()
 load_fonts()
-load_rom("roms/ts.ch8")
+load_rom(paramStr(1))
 
 const X_OFFSET = 0 #64 # Screen x offset
 const Y_OFFSET = 0# - 32
@@ -18,7 +24,7 @@ var
   backgroundColour = BLACK
 
 initWindow(screenWidth, screenHeight, "Chip8 Emu")
-setTargetFPS(10)
+setTargetFPS(400)
 
 while not windowShouldClose():
 
