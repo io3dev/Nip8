@@ -17,7 +17,7 @@ nimble run
 
 # Todo
 
-- [ ] Sound
+- [x] Sound
 
 - [ ] Keyboard
 
