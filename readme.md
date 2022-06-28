@@ -9,10 +9,22 @@ Nip 8 is a simple chip8 emulator with (planned) super chip intergration written 
 
 # Running
 
-Make sure you have nim and nimble
+Make sure you have nim and nimble and run these commands
 
 ```
-nimble run
+nimble build
+```
+
+Linux
+
+```
+./chip8 [ROM]
+```
+
+Windows 10/11
+
+```
+chip8.exe [ROM]
 ```
 
 # Todo
@@ -20,6 +32,8 @@ nimble run
 - [x] Sound
 
 - [x] Keyboard
+
+- [ ] Collision
 
 - [ ] All opcodes
 
