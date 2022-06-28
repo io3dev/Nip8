@@ -4,15 +4,15 @@ Nip 8 is a simple chip8 emulator with (planned) super chip intergration written 
 
 # Screenshots
 
-![Test program screemshot](https://github.com/io3dev/Nip8/blob/main/images/c8test.png?raw=true)
+![Test program screemshot](https://github.com/io3dev/Nip8/blob/main/images/ibms.png?raw=true)
 
 
-# Building
+# Running
 
 Make sure you have nim and nimble
 
 ```
-nimble build
+nimble run
 ```
 
 # Todo
