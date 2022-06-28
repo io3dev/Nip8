@@ -1,6 +1,5 @@
 import nimraylib_now
 import cpu
-import math
 import os
 
 
@@ -16,8 +15,8 @@ load_rom(paramStr(1))
 
 let sfx = loadMusicStream("beep.ogg")
 
-const X_OFFSET = 0 #64 # Screen x offset
-const Y_OFFSET = 0# - 32
+const X_OFFSET = 0
+const Y_OFFSET = 0
 
 var
   screenWidth: int32 = 520

@@ -1,6 +1,4 @@
-import strutils
 import debug_op
-import streams
 
 
 const
@@ -64,8 +62,6 @@ proc init*() =
 proc load_fonts*() =
     for j in 0..79:
         memory[j] = FONTS[j]
-
-    #cho memory[0].toHex()
 
 # Loads rom file to starting address 0x200 and up
 proc load_rom*(path: string) =
