@@ -4,7 +4,7 @@ Nip 8 is a simple chip8 emulator with (planned) super chip intergration written 
 
 # Screenshots
 
-![Test program screemshot](https://github.com/io3dev/Nip-8/blob/main/c8test.png?raw=true)
+![Test program screemshot](https://github.com/io3dev/Nip8/blob/main/images/c8test.png?raw=true)
 
 
 # Building
