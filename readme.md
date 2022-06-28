@@ -19,7 +19,7 @@ nimble run
 
 - [x] Sound
 
-- [ ] Keyboard
+- [x] Keyboard
 
 - [ ] All opcodes
 
