@@ -49,10 +49,13 @@ var
 
     drawflag: bool
 
+    # Doesnt matter what key this is at the start because it will only be checked once
+    # keyPressed is true
+    curKey = 0
+    keyPressed = false
 type
     Quirks = enum
         Invaders, None
-
 
 proc init*() =
     pc = 0x200
@@ -275,6 +278,26 @@ proc execute() =
         drawflag = true
         pc += 2;
 
+    of 0xE000:
+        case instruction and 0x00FF
+        of 0xA1:
+            # Skips next instruction if key with value of vx is not pressed
+
+            if curKey.byte() != v[x]:
+                pc += 4
+            else:
+                pc += 2
+
+        of 0x9E:
+            if curKey.byte() == v[x]:
+                pc += 4
+            else:
+                pc += 2
+
+        else:
+            discard
+
+
     of 0xF000:
         case instruction and 0x00FF
         of 0x07:
@@ -282,9 +305,10 @@ proc execute() =
             okOp(instruction)
             pc += 2
         of 0x0A:
-            pc += 2
-            # TODO WAIT FOR KEYPRESS
-            #discard
+            # Wait for a keypress and store the key into vx register
+            if keyPressed == true:
+                v[x] = curKey.byte()
+                pc += 2
         of 0x15:
             delayt = v[x]
             okOp(instruction)
@@ -361,5 +385,6 @@ proc get_draw_flag*(): bool =
 proc get_timers*(): (uint8, uint8) =
     return (soundt, delayt)
 
-proc set_draw_flag*(on_off: bool) =
-    draw_flag = on_off
+proc send_key*(key: int, status: bool) =
+    curKey = key
+    keyPressed = status

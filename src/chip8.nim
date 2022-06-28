@@ -1,5 +1,6 @@
 import nimraylib_now
 import cpu
+import strutils
 import os
 
 
@@ -15,8 +16,31 @@ load_rom(paramStr(1))
 
 let sfx = loadMusicStream("beep.ogg")
 
-const X_OFFSET = 0
-const Y_OFFSET = 0
+const
+  X_OFFSET = 0
+  Y_OFFSET = 0
+
+  # This is an array because we will cycle through it to find out which key is pressed
+  # The number of each item is the chip8 key number
+  KEYS = [
+    KeyboardKey.X,
+    KeyboardKey.One,
+    KeyboardKey.Two,
+    KeyboardKey.Three,
+    KeyboardKey.Q,
+    KeyboardKey.W,
+    KeyboardKey.E,
+    KeyboardKey.A,
+    KeyboardKey.S,
+    KeyboardKey.D,
+    KeyboardKey.Z,
+    KeyboardKey.C,
+    KeyboardKey.Four,
+    KeyboardKey.R,
+    KeyboardKey.F,
+    KeyboardKey.V
+  ]
+
 
 var
   screenWidth: int32 = 520
@@ -26,7 +50,7 @@ var
   backgroundColour = BLACK
 
 initWindow(screenWidth, screenHeight, "Chip8 Emu")
-setTargetFPS(60)
+setTargetFPS(400)
 
 while not windowShouldClose():
   playMusicStream(sfx)
@@ -51,7 +75,14 @@ while not windowShouldClose():
           let pix_y = y * 8 + Y_OFFSET
 
           drawRectangle(cint(pix_x), cint(pix_y), 10, 10, backgroundColour)
-  #clearBackground(Raywhite)
+
+  send_key(0, false)
+  var curKey = 0
+  #echo keyPressed
+  for i in 0..Keys.high():
+    if isKeyDown(Keys[i]):
+      send_key(i, true)
+
   endDrawing()
 
 closeWindow()

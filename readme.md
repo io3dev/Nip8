@@ -23,4 +23,6 @@ nimble run
 
 - [ ] All opcodes
 
+- [ ] Quirks
+
 - [ ] Super Chip
