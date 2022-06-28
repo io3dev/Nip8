@@ -78,6 +78,7 @@ proc load_rom*(path: string) =
     close(f)
 
 proc execute() =
+    #echo soundt
     let msb = memory[pc]
     let lsb = memory[pc + 1]
 
@@ -360,6 +361,9 @@ proc get_graphics_buffer*(): array[MEMORYSIZE, byte] =
 
 proc get_draw_flag*(): bool =
     return drawflag
+
+proc get_timers*(): (uint8, uint8) =
+    return (soundt, delayt)
 
 proc set_draw_flag*(on_off: bool) =
     draw_flag = on_off

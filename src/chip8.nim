@@ -10,24 +10,27 @@ if paramCount() == 0:
   quit(QuitFailure)
 
 init()
+initAudioDevice()
 load_fonts()
 load_rom(paramStr(1))
+
+let sfx = loadMusicStream("beep.ogg")
 
 const X_OFFSET = 0 #64 # Screen x offset
 const Y_OFFSET = 0# - 32
 
 var
-  screenWidth: int32 = 800
-  screenHeight: int32 = 450
+  screenWidth: int32 = 520
+  screenHeight: int32 = 270
 
   foregroundColour = WHITE
   backgroundColour = BLACK
 
 initWindow(screenWidth, screenHeight, "Chip8 Emu")
-setTargetFPS(400)
+setTargetFPS(60)
 
 while not windowShouldClose():
-
+  playMusicStream(sfx)
   beginDrawing()
   #clearBackground(Raywhite)
   let flag = get_draw_flag()
@@ -53,3 +56,5 @@ while not windowShouldClose():
   endDrawing()
 
 closeWindow()
+unloadMusicStream(sfx)
+closeAudioDevice()
