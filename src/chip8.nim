@@ -3,11 +3,18 @@ import cpu
 import strutils
 import os
 
+type
+  AppOptions = enum
+    MANUAL_CYCLE, NORMAL
 
-
+var CurOptions = @[AppOptions.NORMAL]
 if paramCount() == 0:
   echo "Failed to specify a chip8 rom!"
   quit(QuitFailure)
+elif paramCount() == 2:
+  case paramStr(2)
+  of "--manual":
+    CurOptions.add(AppOptions.MANUAL_CYCLE)
 
 init()
 initAudioDevice()
@@ -44,13 +51,13 @@ const
 
 var
   screenWidth: int32 = 520
-  screenHeight: int32 = 270
+  screenHeight: int32 = 300
 
   foregroundColour = WHITE
   backgroundColour = BLACK
 
 initWindow(screenWidth, screenHeight, "Chip8 Emu")
-setTargetFPS(400)
+setTargetFPS(200)
 
 while not windowShouldClose():
   playMusicStream(sfx)
@@ -58,7 +65,17 @@ while not windowShouldClose():
   #clearBackground(Raywhite)
   let flag = get_draw_flag()
   let gfx = get_graphics_buffer()
-  cycle()
+  let pcs = cstring(get_pc())
+  #drawText(cstring(get_pc()), 50, 270, 100, RED)
+  if CurOptions[0] == AppOptions.MANUAL_CYCLE:
+    drawText("MANUAL CYCLE MODE", 190, 300, 20, RED)
+    if isKeyPressed(KeyboardKey.Space):
+      cycle()
+  else:
+    cycle()
+
+
+  #cycle()
   if flag == true:
     clearBackground(Raywhite)
     for y in 0..32:
@@ -68,6 +85,7 @@ while not windowShouldClose():
           let pix_y = y * 8 + Y_OFFSET
 
           drawRectangle(cint(pix_x), cint(pix_y), 10, 10, foregroundColour)
+
           #set_draw_flag(false)
 
         else:

@@ -1,5 +1,6 @@
 import debug_op
-
+import strutils
+import random
 
 const
     MEMORYSIZE = 4096
@@ -61,6 +62,8 @@ proc init*() =
     pc = 0x200
     sp = 0
 
+    #memory[0x1FF] = 3
+
 # Loads font array to memory address 0..80
 proc load_fonts*() =
     for j in 0..79:
@@ -82,7 +85,7 @@ proc execute() =
     let lsb = memory[pc + 1]
 
     var instruction = (uint16(msb) shl 8) or lsb
-
+    echo instruction.toHex()
     let n = instruction and 0x000F
     let nn = instruction and 0x00FF
     let nnn = instruction and 0x0FFF
@@ -118,7 +121,6 @@ proc execute() =
     of 0xA000:
         I = instruction and 0x0FFF
         okOp(instruction)
-        echo I
         pc += 2;
 
     of 0x1000:
@@ -131,6 +133,7 @@ proc execute() =
         pc = instruction and 0x0FFF
 
         okOp(instruction)
+
 
     of 0x3000:
         # 3xNN
@@ -178,25 +181,31 @@ proc execute() =
             v[x] = v[y]
             okOp(instruction)
             pc += 2
+
         of 0x1:
             v[x] = v[x] or v[y]
             okOp(instruction)
             pc += 2
+            #v[0xF] = 0
         of 0x2:
             v[x] = v[x] and v[y]
             okOp(instruction)
+            #v[0xF] = 0
             pc += 2
         of 0x3:
             v[x] = v[x] xor v[y]
             okOp(instruction)
+            #v[0xF] = 0
             pc += 2
         of 0x4:
             # Add vx and vy, if overflowing vf set to 1
             let result = v[x] + v[y]
             # If the result of vx and vy is overflowing 8 bits
             # set the VF register to 1 (carry flag)
-            if result > 255:
+            if v[y] > (0xFF - v[x]):
                 v[0xF] = 1
+            else:
+                v[0xF] = 0
             v[x] = result
 
             okOp(instruction)
@@ -219,25 +228,34 @@ proc execute() =
             #echo v[x] shr 1
 
             v[0xF] = v[x] and 0x1
-            v[x] = (v[x] shr 1)
+
+            # Quirk for specific games, for future use
+            #v[x] = (v[x] shr 1)
+
+            v[x] = (v[y] shr 1)
 
             pc += 2
 
         of 0x7:
             # sets vx to vy minus vx
 
-            if v[x] > v[y]:
+            if v[x] < v[y]:
                 v[0xF] = 1
             else:
                 v[0xF] = 0
 
             v[x] = v[y] - v[x]
+            pc += 2
 
         of 0xE:
             okOp(instruction)
 
             v[0xF] = (v[x] shr 7)
-            v[x] = (v[x] shl 1)
+
+            # Quirk for specific games, for future use
+            #v[y] = (v[x] shl 1)
+
+            v[x] = (v[y] shl 1)
 
             pc += 2
 
@@ -253,6 +271,19 @@ proc execute() =
         else:
             pc += 2
 
+    of 0xB000:
+        # Jumps to address NNN plus V register 0
+
+        pc = (instruction and 0x0FFF) + v[0]
+
+    of 0xC000:
+        # Sets vx to bitwise and of a random number from 0..255
+        v[x] = rand(255).byte() and (instruction and 0x00FF).byte()
+
+        okOp(instruction)
+        pc += 2
+
+
     of 0xD000:
         
         # Dxyn
@@ -260,8 +291,8 @@ proc execute() =
 
         let height = instruction and 0x000F
 
-        let xpos = v[x] and 63
-        let ypos = v[y] and 31
+        let xpos = v[x] mod 64
+        let ypos = v[y] mod 32
 
         v[0xF] = 0
         for rows in 0..<uint(height):
@@ -272,6 +303,9 @@ proc execute() =
 
                     let a = v[x] + uint16(w)
                     let b = v[y] + uint16(rows)
+
+                    if graphics[a + (b * 64)] == 1:
+                        v[0xF] = 1
                     graphics[a + (b * 64)] = graphics[a + (b * 64)] xor 1 
 
         okOp(instruction)
@@ -288,14 +322,19 @@ proc execute() =
             else:
                 pc += 2
 
+            okOp(instruction)
+
         of 0x9E:
             if curKey.byte() == v[x]:
                 pc += 4
             else:
                 pc += 2
 
+            okOp(instruction)
+
         else:
-            discard
+            noOp(instruction)
+
 
 
     of 0xF000:
@@ -325,39 +364,35 @@ proc execute() =
             I = v[x] * 5
             okOp(instruction)
             pc += 2
+
         of 0x33:
-            
-            let a = v[x] mod 1000
-            #memory[I] = (int(a) / 100).uint16
+            memory[I] = v[x] div 100
+            memory[I + 1] = (v[x] div 10) mod 10
+            memory[I + 2] = (v[x] mod 100) mod 10
 
-            memory[I] = (v[x].float / 100).uint8
-            #memory[I + 1] = #((v[x].float / 10).int16 mod 10).uint16
-            memory[I + 1] = ((v[x] mod 100).float / 10).uint8
-            memory[I + 2] = (v[x] mod 10).uint8
-
-            #    M[I] = V[x] / 100;
-            # #   M[I + 1] = (V[x] / 10) % 10;
-            #    M[I + 2] = V[x] % 10;
-
-            pc += 2
-        of 0x65:
-            #TODO Not working
             pc += 2
 
         of 0x55:
-            #TODO Not working
-            
+            echo "ORG: ", instruction and 0x000F
+            for i in uint32(0)..(instruction and 0x000F):
+                memory[I + i] = v[i]
+            #I += 
+            pc += 2
 
-            for i in uint(0)..<x:
+        of 0x65:
+            for i in uint32(0)..(instruction and 0x000F):
                 v[i] = memory[I + i].byte()
+                #echo instruction and
 
             pc += 2
+            okOp(instruction)
+
         else:
             noOp(instruction)
 
     else:
         noOp(instruction)
-        pc += 2;
+        #pc += 2;
 
 
 proc timers() =
@@ -388,3 +423,6 @@ proc get_timers*(): (uint8, uint8) =
 proc send_key*(key: int, status: bool) =
     curKey = key
     keyPressed = status
+
+proc get_pc*(): string =
+    discard intToStr(pc.int)
