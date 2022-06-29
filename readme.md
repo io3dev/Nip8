@@ -33,7 +33,7 @@ chip8.exe [ROM]
 
 - [x] Keyboard
 
-- [ ] Collision
+- [x] Collision
 
 - [ ] All opcodes
 
