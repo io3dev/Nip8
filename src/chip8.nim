@@ -53,11 +53,11 @@ var
   screenWidth: int32 = 520
   screenHeight: int32 = 300
 
-  foregroundColour = WHITE
-  backgroundColour = BLACK
+  foregroundColour = BLACK
+  backgroundColour = WHITE
 
 initWindow(screenWidth, screenHeight, "Chip8 Emu")
-setTargetFPS(200)
+setTargetFPS(800)
 
 while not windowShouldClose():
   playMusicStream(sfx)

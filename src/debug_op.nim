@@ -8,4 +8,4 @@ proc okOp*(op: uint16) =
 # Reports missing instruction and hangs
 proc noOp*(op: uint16) =
     echo "[NF] ", op.toHex()
-    discard
+    #discard

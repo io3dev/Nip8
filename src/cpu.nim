@@ -1,6 +1,7 @@
 import debug_op
 import strutils
 import random
+import os
 
 const
     MEMORYSIZE = 4096
@@ -62,7 +63,7 @@ proc init*() =
     pc = 0x200
     sp = 0
 
-    #memory[0x1FF] = 3
+    #memory[0x1FF] = 5
 
 # Loads font array to memory address 0..80
 proc load_fonts*() =
@@ -186,16 +187,16 @@ proc execute() =
             v[x] = v[x] or v[y]
             okOp(instruction)
             pc += 2
-            #v[0xF] = 0
+            v[0xF] = 0
         of 0x2:
             v[x] = v[x] and v[y]
             okOp(instruction)
-            #v[0xF] = 0
+            v[0xF] = 0
             pc += 2
         of 0x3:
             v[x] = v[x] xor v[y]
             okOp(instruction)
-            #v[0xF] = 0
+            v[0xF] = 0
             pc += 2
         of 0x4:
             # Add vx and vy, if overflowing vf set to 1
@@ -291,8 +292,8 @@ proc execute() =
 
         let height = instruction and 0x000F
 
-        let xpos = v[x] mod 64
-        let ypos = v[y] mod 32
+        let xpos = v[x]# mod 64
+        let ypos = v[y]
 
         v[0xF] = 0
         for rows in 0..<uint(height):
@@ -301,8 +302,8 @@ proc execute() =
             for w in 0..<8:
                 if (sprite and (uint8(0x80) shr w)) != 0:
 
-                    let a = v[x] + uint16(w)
-                    let b = v[y] + uint16(rows)
+                    let a = v[x] + uint32(w)
+                    let b = v[y] + uint32(rows)
 
                     if graphics[a + (b * 64)] == 1:
                         v[0xF] = 1
@@ -372,27 +373,29 @@ proc execute() =
 
             pc += 2
 
-        of 0x55:
-            echo "ORG: ", instruction and 0x000F
-            for i in uint32(0)..(instruction and 0x000F):
-                memory[I + i] = v[i]
-            #I += 
-            pc += 2
-
         of 0x65:
-            for i in uint32(0)..(instruction and 0x000F):
+            for i in uint(0)..x:
+                echo x
+                echo " ASDASD:", instruction.toHex()
                 v[i] = memory[I + i].byte()
-                #echo instruction and
-
+            I += 1
             pc += 2
-            okOp(instruction)
 
+
+        of 0x55:
+            for i in uint(0)..x:
+                echo x
+                echo " ASDASD:", instruction.toHex()
+                memory[I + i] = v[i]
+            I += 1
+            pc += 2;
         else:
             noOp(instruction)
+            pc += 2;
 
     else:
         noOp(instruction)
-        #pc += 2;
+        pc += 2;
 
 
 proc timers() =
@@ -401,6 +404,7 @@ proc timers() =
 
     if delayt != 0:
         delayt -= 1
+        sleep(10)
 
 proc cycle*() =
     #draw_flag = false
